@@ -8,7 +8,22 @@
             "group": "build",
             "type": "shell",
             "command": "scons",
-            "args" : ["-j4"],
+            "windows" : {
+                "args" : ["-j4", "platform=windows"]
+            },
+            "linux" : {
+                "args" : ["-j4", "platform=linux"]
+            },
+            "osx" : {
+                "args" : ["-j4", "platform=osx"]
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Clean Objects",
+            "type": "shell",
+            "command": "scons",
+            "args" : ["platform=windows", "-c"],
             "problemMatcher": []
         },
     ]
