@@ -2,5 +2,6 @@ bin/
 *.obj
 *.ilk
 *.dll
+*.lib
 *.pdb
 .sconsign.dblite

@@ -1,7 +1,19 @@
 #include "octree.h"
+#include <assert.h>
 
 namespace bigrock
 {
+    #pragma region Octant
+    template <class PointType>
+    Octant<PointType>::Octant(Octant<PointType> *parent, Octree<PointType> *root, uint16_t depth, PointType data)
+    {
+        this->parent = parent;
+        this->root = root;
+        this->depth = depth;
+        this->has_children = false;
+        this->data = data;
+    }
+
     template <class T>
     int Octant<T>::get_octant_index()
     {
@@ -52,6 +64,8 @@ namespace bigrock
     {
         if(!this->has_children)
             throw std::logic_error("attempted to get the child of a leaf octree")
+        if(index < 0 || index > 7)
+            throw std::logic_error("attempted to get a child of an octree out of index bounds")
         
         return this->children[index];
     }
@@ -71,7 +85,23 @@ namespace bigrock
     }
 
     template <class PointType>
-    PointType get_data_at_position(Vector3 target, int max_depth = -1)
+    void Octant<PointType>::set_data(PointType data)
+    {
+        if(!this->has_children)
+        {
+            this->data = data;
+        }
+        else
+        {
+            Octant *current_octant = children[0];
+            while(!current_octant->is_leaf_node())
+                current_octant = current_octant->children[0];
+            current_octant->data = data;
+        }
+    }
+
+    template <class PointType>
+    PointType Octant<PointType>::get_data_at_position(Vector3 target, int max_depth)
     {
         #ifdef BIGROCK_OCTREE_CHECK_BOUNDS
         Vector3 position = this->get_position();
@@ -81,8 +111,11 @@ namespace bigrock
             throw std::logic_error("attempted to get data at position outside of Octant bounds");
         #endif
 
+        if(max_depth < 0 || max_depth > MAX_DEPTH)
+            max_depth = MAX_DEPTH;
+
         Octant *current_octant = this; // Start here
-        while(current_octant->has_children && (max_depth == -1 || current_octant->depth < max_depth))
+        while(current_octant->has_children && (current_octant->depth < max_depth))
         {
             int next_index = current_octant->get_octant_index_containing_position(target);
             current_octant = current_octant->get_child(next_index);
@@ -123,6 +156,195 @@ namespace bigrock
     {
         // Traverse up this Octant until the root is reached, adding to the offset as we go
         Vector3 offset;
-        
+        Octant *current_octant = this;
+        while(current_octant != root)
+        {
+            offset += current_octant->size * CUBE_VERTICES[current_octant->get_octant_index()];
+        }
+        return offset;
     }
+
+    template <class PointType>
+    Vector3 Octant<PointType>::get_closest_data_at_position(Vector3 target, PointType &out, int max_depth = -1)
+    {
+        #ifdef BIGROCK_OCTREE_CHECK_BOUNDS
+        Vector3 position = this->get_position();
+        Vector3 size = this->get_size();
+        Vector3 bounds = position + size;
+        if (target.x > bounds.x || target.y > bounds.y || target.z > bounds.z || target.x < position.x || target.y < position.y || target.z < position.z)
+            throw std::logic_error("attempted to get data at position outside of Octant bounds");
+        #endif
+
+        if(max_depth < 0 || max_depth > MAX_DEPTH)
+            max_depth = MAX_DEPTH;
+        
+        Octant *current_octant = this;
+        Vector3 offset = this->get_position();
+        while(current_octant->has_children && (current_octant->depth < max_depth))
+        {
+            int next_index = current_octant->get_octant_index_containing_position(target);
+            offset += (current_octant->get_size() / 2) * CUBE_VERTICES[next_index];
+            current_octant = current_octant->children[next_index];
+        }
+        out = PointType(current_octant->get_data());
+
+        #ifndef NDEBUG
+        assert(offset == current_octant->get_position()) // Debug assertion
+        #endif
+
+        return offset;
+    }
+
+    template <class PointType>
+    Vector3 Octant<PointType>::set_data_at_position(Vector3 target, PointType data, int max_depth = -1)
+    {
+        #ifdef BIGROCK_OCTREE_CHECK_BOUNDS
+        Vector3 position = this->get_position();
+        Vector3 size = this->get_size();
+        Vector3 bounds = position + size;
+        if (target.x > bounds.x || target.y > bounds.y || target.z > bounds.z || target.x < position.x || target.y < position.y || target.z < position.z)
+            throw std::logic_error("attempted to get data at position outside of Octant bounds");
+        #endif
+
+        if(max_depth < 0 || max_depth > MAX_DEPTH)
+            max_depth = MAX_DEPTH;
+
+        Octant *current_octant = this;
+        Vector3 offset = this->get_position();
+        // Go down existing children
+        while(current_octant->has_children && (current_octant->depth < max_depth))
+        {
+            int next_index = current_octant->get_octant_index_containing_position(target);
+            offset += (get_size() / 2) * CUBE_VERTICES[next_index];
+            current_octant = current_octant->children[next_index];
+        }
+        if(offset == target || current_octant->get_data().can_collapse(data))
+            // Either we are at the target, or the data is acceptably similar for collapse
+            current_octant->set_data(data);
+            // Since we didnt have to subdivide, check if collapse can be done
+        else
+        {
+            while(offset != target && (current_octant->depth < max_depth))
+            {
+                current_octant->subdivide();
+                int next_index = current_octant->get_octant_index_containing_position(target);
+                offset += (current_octant->get_size() / 2) * CUBE_VERTICES[next_index];
+                current_octant = current_octant->children[next_index];
+            }
+            // We've either reached the target or the max depth. Set the data
+            current_octant->data = data;
+        }
+
+        #ifndef NDEBUG
+        assert(offset == current_octant->get_position()) // Debug assertion
+        #endif
+
+        return offset;
+    }
+
+    template <class PointType>
+    void Octant<PointType>::collapse()
+    { // TODO: Make this iterative instead of recursive
+        if(!this->has_children)
+            return; // Already a leaf, no collapse required
+        
+        PointType data = children[0]->data;
+
+        for(int i = 0; i < 8; i++)
+        {
+            children[i]->collapse();
+            delete children[i];
+        }
+        has_children = false;
+        this->data = data;
+    }
+
+    template <class PointType>
+    void Octant<PointType>::subdivide()
+    {
+        if (this->has_children)
+            return; // Already subdivided
+        
+        PointType data = this->data;
+        this->has_children = true;
+        
+        for(int i = 0; i < 8; i++)
+        {
+            children[i] = new Octant<PointType>(this, root, this->depth + 1, data);
+        }
+    }
+
+    template <class PointType>
+    bool Octant<PointType>::can_collapse()
+    { // TODO: Make this iterative instead of recursive
+        if(this->has_children)
+        {
+            bool collapse = true;
+            // We need to check if the 8 children this octant has can be turned into one
+            for(int i = 0; collapse && i < 8; i++)
+            {
+                // First, if the child isn't a leaf node, recursively check if it can collapse.
+                if(!children[i]->is_leaf_node())
+                {
+                    collapse = collapse && children[i]->can_collapse();
+                }
+                else if(i > 0)
+                { // If the child is a leaf, and it isn't the first octant, check if it's collapsable against the previous node
+                    collapse = collapse && children[i]->data.can_collapse(children[i-1]->get_data());
+                    // We can skip i=0 because collapsability is transient.
+                    // If i=0 is collapsable with i=1, and i=1 is collapsable
+                    // with i=2, then it can be assumed that i=0 is collapsable
+                    // with i=2.
+                }
+            }
+            return collapse;
+        }
+        else
+        {
+            return false; // Can't collapse, already collapsed
+        }
+    }
+
+    template <class PointType>
+    void Octant<PointType>::optimize(bool optimize_children=true)
+    { // TODO: Make this iterative instead of recursive
+        if(optimize_children && this->has_children)
+        {
+            bool collapseable = true;
+            for(int i = 0; collapseable && i < 8; i++)
+            {
+                if(children[i]->can_collapse())
+                {
+                    children[i]->collapse();
+                }
+                else
+                {
+                    collapseable = collapseable && !children[i]->has_children;
+                }
+            }
+        }
+        else
+        {
+            if(this->can_collapse())
+                this->collapse();
+        }
+    }
+    #pragma endregion
+
+    #pragma region Octree
+
+    template <class PointType>
+    Octree<PointType>::Octree(Vector3 size, PointType default_data)
+    {
+        this->size = size;
+        this->data = data;
+    }
+
+    template <class PointType>
+    Octree<PointType>::Octree(Vector3 size) : Octree(size, PointType()) {}
+
+    template <class PointType>
+    Octree<PointType>::Octree() : Octree(Vector3(1,1,1), PointType()) {}
+
+    #pragma endregion
 }

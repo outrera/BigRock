@@ -4,7 +4,7 @@
 namespace bigrock
 {
     // Constructors
-    Vector3::Vector3(float x, float y, float z)
+    Vector3::Vector3(BIGROCK_VEC3_TYPE x, BIGROCK_VEC3_TYPE y, BIGROCK_VEC3_TYPE z)
     {
         this->x = x;
         this->y = y;
@@ -92,9 +92,9 @@ namespace bigrock
         return (x != other.x || y != other.y || z != other.z);
     }
 
-    // float operators
+    // float/double operators
 
-    inline Vector3 &Vector3::operator*=(const float &other)
+    inline Vector3 &Vector3::operator*=(const BIGROCK_VEC3_TYPE &other)
     {
         x *= other;
         y *= other;
@@ -102,12 +102,12 @@ namespace bigrock
         return *this;
     }
 
-    inline Vector3 Vector3::operator*(const float &other) const
+    inline Vector3 Vector3::operator*(const BIGROCK_VEC3_TYPE &other) const
     {
         return Vector3(x * other, y * other, z * other);
     }
 
-    inline Vector3 &Vector3::operator/=(const float &other)
+    inline Vector3 &Vector3::operator/=(const BIGROCK_VEC3_TYPE &other)
     {
         x /= other;
         y /= other;
@@ -115,7 +115,7 @@ namespace bigrock
         return *this;
     }
 
-    inline Vector3 Vector3::operator/(const float &other) const
+    inline Vector3 Vector3::operator/(const BIGROCK_VEC3_TYPE &other) const
     {
         return Vector3(x / other, y / other, z / other);
     }
@@ -125,5 +125,11 @@ namespace bigrock
     inline Vector3 Vector3::operator-() const
     {
         return Vector3(-x, -y, -z);
+    }
+
+    std::ostream &operator<<(std::ostream &out, const Vector3 data)
+    {
+        out << "(" << data.x << ", " << data.y << ", " << data.z << ")";
+        return out;
     }
 }
