@@ -92,4 +92,14 @@ namespace bigrock
         out << "(" << obj.x << ", " << obj.y << ", " << obj.z << ")";
         return out;
     }
+
+    bool Vector3::operator==(const Vector3 &other) const
+    {
+        return (this->x == other.x && this->y == other.y && this->z == other.z);
+    }
+
+    bool Vector3::operator!=(const Vector3 &other) const
+    {
+        return (this->x != other.x || this->y != other.y || this->z != other.z);
+    }
 }

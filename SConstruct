@@ -56,7 +56,7 @@ for path in cpppath:
 	sources += Glob(path + "*.cpp")
 
 if env['build_test'] != '':
-	env.Program(source = sources + ["tests/" + env['build_test'] + ".cpp"], target = 'tests/' + env['build_test'])
+	env.Program(source = sources + ["tests/" + env['build_test'] + ".cpp"], target = 'bin/' + env['build_test'])
 elif env['build'] == 'object':
 	env.Object(source = sources)
 elif env['build'] == 'static':

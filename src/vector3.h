@@ -9,9 +9,8 @@
 
 namespace bigrock
 {
-    class Vector3
+    struct Vector3
     {
-        public:
         BIGROCK_VEC3_TYPE x, y, z;
 
         Vector3(BIGROCK_VEC3_TYPE x, BIGROCK_VEC3_TYPE y, BIGROCK_VEC3_TYPE z);
@@ -34,6 +33,10 @@ namespace bigrock
 
         Vector3 &operator*=(const BIGROCK_VEC3_TYPE &other);
         Vector3 &operator/=(const BIGROCK_VEC3_TYPE &other);
+
+        // Comparison operators
+        bool operator==(const Vector3 &other) const;
+        bool operator!=(const Vector3 &other) const;
 
         friend std::ostream &operator<<(std::ostream &out, const Vector3 &obj);
     };
