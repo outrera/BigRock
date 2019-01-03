@@ -1,9 +1,7 @@
 #include "vector3.h"
-#include <cmath>
 
 namespace bigrock
 {
-    // Constructors
     Vector3::Vector3(BIGROCK_VEC3_TYPE x, BIGROCK_VEC3_TYPE y, BIGROCK_VEC3_TYPE z)
     {
         this->x = x;
@@ -11,125 +9,87 @@ namespace bigrock
         this->z = z;
     }
 
-    Vector3::Vector3()
+    Vector3::Vector3() : Vector3(0,0,0) {}
+
+    #pragma region Vector3 Operators
+    Vector3 Vector3::operator+(const Vector3 &other) const
     {
-        x = 0;
-        y = 0;
-        z = 0;
+        return Vector3(this->x + other.x, this->y + other.y, this->z + other.z);
+    }
+    Vector3 Vector3::operator-(const Vector3 &other) const
+    {
+        return Vector3(this->x - other.x, this->y - other.y, this->z - other.z);
+    }
+    Vector3 Vector3::operator*(const Vector3 &other) const
+    {
+        return Vector3(this->x * other.x, this->y * other.y, this->z * other.z);
+    }
+    Vector3 Vector3::operator/(const Vector3 &other) const
+    {
+        return Vector3(this->x / other.x, this->y / other.y, this->z / other.x);
     }
 
-    inline Vector3 Vector3::inverse() const
+    Vector3 &Vector3::operator+=(const Vector3 &other)
     {
-        return Vector3(1.0 / x, 1.0 / y, 1.0 / z);
+        this->x += other.x;
+        this->y += other.y;
+        this->z += other.z;
+        return *this;
+    }
+    Vector3 &Vector3::operator-=(const Vector3 &other)
+    {
+        this->x -= other.x;
+        this->y -= other.y;
+        this->z -= other.z;
+        return *this;
+    }
+    Vector3 &Vector3::operator*=(const Vector3 &other)
+    {
+        this->x *= other.x;
+        this->y *= other.y;
+        this->z *= other.z;
+        return *this;
+    }
+    Vector3 &Vector3::operator/=(const Vector3 &other)
+    {
+        this->x /= other.x;
+        this->y /= other.y;
+        this->z /= other.z;
+        return *this;
+    }
+    #pragma endregion // Vector3 Operators
+
+    #pragma region BIGROCK_VEC3_TYPE Operators
+
+    Vector3 Vector3::operator*(const BIGROCK_VEC3_TYPE &other) const
+    {
+        return Vector3(this->x * other, this->y * other, this->z * other);
+    }
+    Vector3 Vector3::operator/(const BIGROCK_VEC3_TYPE &other) const
+    {
+        return Vector3(this->x / other, this->y / other, this->z / other);
     }
 
-    inline Vector3 Vector3::abs() const
+    Vector3 &Vector3::operator*=(const BIGROCK_VEC3_TYPE &other)
     {
-        return Vector3(fabs(x), fabs(y), fabs(z));
+        this->x *= other;
+        this->y *= other;
+        this->z *= other;
+        return *this;
     }
-
-    inline Vector3 &Vector3::operator+=(const Vector3 &other)
+    Vector3 &Vector3::operator/=(const BIGROCK_VEC3_TYPE &other)
     {
-        x += other.x;
-        y += other.y;
-        z += other.z;
+        this->x *= other;
+        this->y *= other;
+        this->z *= other;
         return *this;
     }
 
-    inline Vector3 Vector3::operator+(const Vector3 &other) const
+    #pragma endregion // BIGROCK_VEC3_TYPE Operators
+
+    std::ostream &operator<<(std::ostream &out, const Vector3 &obj)
     {
-        return Vector3(x + other.x, y + other.y, z + other.z);
-    }
-
-    inline Vector3 &Vector3::operator-=(const Vector3 &other)
-    {
-        x -= other.x;
-        y -= other.y;
-        z -= other.z;
-        return *this;
-    }
-
-    inline Vector3 Vector3::operator-(const Vector3 &other) const
-    {
-        return Vector3(x - other.x, y - other.y, z - other.z);
-    }
-
-    inline Vector3 &Vector3::operator*=(const Vector3 &other)
-    {
-        x *= other.x;
-        y *= other.y;
-        z *= other.z;
-        return *this;
-    }
-
-    inline Vector3 Vector3::operator*(const Vector3 &other) const
-    {
-        return Vector3(x * other.x, y * other.y, z * other.z);
-    }
-
-    inline Vector3 &Vector3::operator/=(const Vector3 &other)
-    {
-        x /= other.x;
-        y /= other.y;
-        z /= other.z;
-        return *this;
-    }
-
-    inline Vector3 Vector3::operator/(const Vector3 &other) const
-    {
-        return Vector3(x / other.x, y / other.y, z / other.z);
-    }
-
-    // Comparison
-
-    inline bool Vector3::operator==(const Vector3 &other) const
-    {
-        return (x == other.x && y == other.y && z == other.z);
-    }
-
-    inline bool Vector3::operator!=(const Vector3 &other) const
-    {
-        return (x != other.x || y != other.y || z != other.z);
-    }
-
-    // float/double operators
-
-    inline Vector3 &Vector3::operator*=(const BIGROCK_VEC3_TYPE &other)
-    {
-        x *= other;
-        y *= other;
-        z *= other;
-        return *this;
-    }
-
-    inline Vector3 Vector3::operator*(const BIGROCK_VEC3_TYPE &other) const
-    {
-        return Vector3(x * other, y * other, z * other);
-    }
-
-    inline Vector3 &Vector3::operator/=(const BIGROCK_VEC3_TYPE &other)
-    {
-        x /= other;
-        y /= other;
-        z /= other;
-        return *this;
-    }
-
-    inline Vector3 Vector3::operator/(const BIGROCK_VEC3_TYPE &other) const
-    {
-        return Vector3(x / other, y / other, z / other);
-    }
-
-    // Other operators
-
-    inline Vector3 Vector3::operator-() const
-    {
-        return Vector3(-x, -y, -z);
-    }
-
-    std::ostream &operator<<(std::ostream &out, const Vector3 data)
-    {
-        out << "(" << data.x << ", " << data.y << ", " << data.z << ")";
+        out << "(" << obj.x << ", " << obj.y << ", " << obj.z << ")";
         return out;
     }
 }
