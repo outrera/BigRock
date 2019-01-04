@@ -49,7 +49,7 @@ namespace bigrock
         union
         {
             Octant<PointType> *children[8];
-            PointType data;
+            PointType *data;
         };
 
         Octant(Octant<PointType> *parent, Octree<PointType> *root, uint8_t index, PointType data); // Child constructor
@@ -137,14 +137,39 @@ namespace bigrock
             this->parent = NULL;
             this->root = this;
             this->depth = 0;
+
             this->has_children = false;
+            this->data = new PointType(data);
+
             this->relative_position = Vector3(0,0,0);
-            this->data = data;
             this->size = size;
         }
 
-        Octree(Vector3 size) : Octree<PointType>(size, PointType()) {}
-        Octree() : Octree<PointType>(Vector3(), PointType()) {}
+        Octree(Vector3 size)
+        {
+            this->parent = NULL;
+            this->root = this;
+            this->depth = 0;
+
+            this->has_children = false;
+            this->data = new PointType();
+
+            this->size = size;
+            this->relative_position = Vector3(0,0,0);
+        }
+
+        Octree()
+        {
+            this->parent = NULL;
+            this->root = this;
+            this->depth = 0;
+            
+            this->has_children = false;
+            this->data = new PointType();
+            
+            this->size = Vector3(1,1,1);
+            this->relative_position = Vector3(0,0,0);
+        }
 
         Vector3 size; // Used for getting position and size of Octants
     };

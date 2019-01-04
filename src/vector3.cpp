@@ -9,7 +9,12 @@ namespace bigrock
         this->z = z;
     }
 
-    Vector3::Vector3() : Vector3(0,0,0) {}
+    Vector3::Vector3()
+    {
+        this->x = 0;
+        this->y = 0;
+        this->z = 0;
+    }
 
     #pragma region Vector3 Operators
     Vector3 Vector3::operator+(const Vector3 &other) const
@@ -87,13 +92,11 @@ namespace bigrock
 
     #pragma endregion // BIGROCK_VEC3_TYPE Operators
 
-    #ifdef _IOSTREAM_
     std::ostream &operator<<(std::ostream &out, const Vector3 &obj)
     {
         out << "(" << obj.x << ", " << obj.y << ", " << obj.z << ")";
         return out;
     }
-    #endif
 
     bool Vector3::operator==(const Vector3 &other) const
     {

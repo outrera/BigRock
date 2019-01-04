@@ -5,7 +5,7 @@ namespace bigrock
     template <class PointType>
     Octant<PointType>::Octant(Octant<PointType> *parent, Octree<PointType> *root, uint8_t index, PointType data)
     {
-        this->data = data;
+        this->data = new PointType(data);
         this->parent = parent;
         this->root = root;
         this->depth = parent->depth + 1;
@@ -19,6 +19,8 @@ namespace bigrock
         if(has_children)
             for(int i = 0; i < 8; i++)
                 delete children[i];
+        else
+            delete data;
     }
 
     template <class PointType>
@@ -33,7 +35,7 @@ namespace bigrock
             delete children[i];
         
         this->has_children = false;
-        this->data = data;
+        this->data = new PointType(data);
     }
 
     template <class PointType>
@@ -42,7 +44,7 @@ namespace bigrock
         if(has_children)
             return; // Already subdivided
         
-        const PointType data = this->data; // Copy data so it doesn't get destroyed
+        const PointType data = *this->data; // Copy data so it doesn't get destroyed
 
         has_children = true;
         for(int i = 0; i < 8; i++)
@@ -102,7 +104,7 @@ namespace bigrock
         }
         else
         {
-            return this->data;
+            return *this->data;
         }
     }
 
@@ -121,7 +123,7 @@ namespace bigrock
             }
 
             // We've gone as low as we can
-            return current_octant->data;
+            return *current_octant->data;
         }
     }
 
@@ -131,7 +133,7 @@ namespace bigrock
         if(has_children)
             throw std::logic_error("Attempted to set data of a non-leaf Octant");
         else
-            this->data = data;
+            this->data = new PointType(data);
     }
 
     template <class PointType>
@@ -139,15 +141,21 @@ namespace bigrock
     {
         Octant<PointType> *current_octant = this;
         Vector3 offset = current_octant->get_position();
-        while(target != offset && current_octant->depth < max_depth)
+        while(target != offset && (current_octant->depth < max_depth))
         {
             if(!current_octant->has_children)
                 current_octant->subdivide();
             
             int next = current_octant->get_octant_index(target);
             offset += current_octant->get_size() * CUBE_VERTICES[next];
-            current_octant = current_octant->get_child(next);
+            current_octant = current_octant->children[next];
         }
+
+        while(current_octant->has_children)
+            current_octant = current_octant->children[0];
+        
+        current_octant->set_data(data);
+        return offset;
     }
 
     template <class PointType>

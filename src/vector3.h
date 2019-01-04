@@ -5,6 +5,8 @@
 #define BIGROCK_VEC3_TYPE float
 #endif
 
+#include <iostream>
+
 namespace bigrock
 {
     struct Vector3
@@ -36,9 +38,7 @@ namespace bigrock
         bool operator==(const Vector3 &other) const;
         bool operator!=(const Vector3 &other) const;
 
-        #ifdef _IOSTREAM_
         friend std::ostream &operator<<(std::ostream &out, const Vector3 &obj);
-        #endif
     };
 }
 

@@ -29,10 +29,11 @@ int main(int argc, char const *argv[])
             cout << "Child " << i << " position: " << octree.get_position() << endl;
         }
         cout << "octree.is_leaf_node() = " << octree.is_leaf_node() << endl;
-        cout << "octree.can_collapse() = " << octree.can_collapse() << endl; // Crashes silently
+        cout << "octree.can_collapse() = " << octree.can_collapse() << endl;
         cout << "Performing octree.optimize()" << endl;
         octree.optimize();
         cout << "Completed optimize" << endl;
+        cout << "octree.is_leaf_node() = " << octree.is_leaf_node() << endl;
         return 0;
     }
     catch(const std::exception &e)

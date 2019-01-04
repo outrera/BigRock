@@ -4,8 +4,6 @@ import os
 cpppath = ['src/', 'thirdparty/']
 libsuffix = ''
 
-env = DefaultEnvironment(CPPPATH = cpppath)
-
 # Functions
 
 # Command line options
@@ -19,9 +17,14 @@ opts.Add(EnumVariable('allow_implicit_conversion', 'Allows the standard OctreePo
 opts.Add(EnumVariable('octree_check_bounds', 'Perform boundary checks during Octree operations.', 'no', allowed_values=['yes', 'no'], ignorecase=2))
 opts.Add(EnumVariable('vector3_type', 'The type to use for Vector3\'s xyz coordinates', 'float', allowed_values=['float', 'double', 'long_double'], ignorecase=2))
 opts.Add(PathVariable('build_test', 'The name of the test source file (stored in tests) to build', '', PathVariable.PathAccept))
+opts.Add(EnumVariable('use_mingw', 'Whether or not to use MinGW on Windows systems', 'no', allowed_values=['yes', 'no'], ignorecase=2))
 
 # Update the environment
+env = Environment(CPPPATH = cpppath)
 opts.Update(env)
+if env['use_mingw'] == 'yes':
+	env = Environment(CPPPATH = cpppath, tools = ['mingw'])
+	opts.Update(env)
 Help(opts.GenerateHelpText(env))
 
 # Setup flags and targets
@@ -37,10 +40,18 @@ if env['vector3_type'] != 'long_double':
 else:
 	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE", "long double")])
 
-if env['platform'] == 'windows':
+if env['platform'] == 'windows' and env['use_mingw'] == 'no':
 	env.Append(CCFLAGS = ["/EHsc"])
 	if env['target'] == 'debug':
 		env.Append(LINKFLAGS = ["/DEBUG"])
+
+elif env['platform'] == 'linux' or env['platform'] == 'osx' or (env['platform'] == 'windows' and env['use_mingw'] == 'yes'):
+	if env['platform'] == 'windows':
+		env.Tool('mingw')
+	env.Append(CCFLAGS = '-std=gnu++98', LINKFLAGS = ['-static-libgcc', '-static-libstdc++'])
+	if env['target'] == 'debug':
+		env.Append(CCFLAGS = ['-g'])
+		
 elif env['platform'] == '':
 	print("Please specify a target platform (windows, linux, osx)")
 	Exit(1)
