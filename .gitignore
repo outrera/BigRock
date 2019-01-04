@@ -6,3 +6,4 @@ bin/
 *.pdb
 .sconsign.dblite
 *.exe
+*.o

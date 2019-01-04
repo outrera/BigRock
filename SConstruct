@@ -48,7 +48,8 @@ if env['platform'] == 'windows' and env['use_mingw'] == 'no':
 elif env['platform'] == 'linux' or env['platform'] == 'osx' or (env['platform'] == 'windows' and env['use_mingw'] == 'yes'):
 	if env['platform'] == 'windows':
 		env.Tool('mingw')
-	env.Append(CCFLAGS = '-std=gnu++98', LINKFLAGS = ['-static-libgcc', '-static-libstdc++'])
+		env.Append(LINKFLAGS = ['-static-libstdc++', '-static-libgcc'])
+	env.Append(CCFLAGS = '-std=gnu++98')
 	if env['target'] == 'debug':
 		env.Append(CCFLAGS = ['-g'])
 		

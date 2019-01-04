@@ -1,5 +1,5 @@
 #ifndef BIGROCK_STANDARD_LIB
-#define BIGROCK_STANDARD_LIB6
+#define BIGROCK_STANDARD_LIB
 
 namespace bigrock
 {
