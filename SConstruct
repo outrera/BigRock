@@ -33,9 +33,9 @@ if env['allow_implicit_conversion'] == 'no':
 	env.Append(CPPDEFINES = ["BIGROCK_STD_DISALLOW_CONVERSION"])
 
 if env['vector3_type'] != 'long_double':
-	env.Append(CPPDEFINES = ["BIGROCK_VEC3_TYPE " + env['vector3_type']])
+	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE ", env['vector3_type'])])
 else:
-	env.Append(CPPDEFINES = ["BIGROCK_VEC3_TYPE long double"])
+	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE", "long double")])
 
 if env['platform'] == 'windows':
 	env.Append(CCFLAGS = ["/EHsc"])

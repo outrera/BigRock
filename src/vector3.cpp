@@ -87,11 +87,13 @@ namespace bigrock
 
     #pragma endregion // BIGROCK_VEC3_TYPE Operators
 
+    #ifdef _IOSTREAM_
     std::ostream &operator<<(std::ostream &out, const Vector3 &obj)
     {
         out << "(" << obj.x << ", " << obj.y << ", " << obj.z << ")";
         return out;
     }
+    #endif
 
     bool Vector3::operator==(const Vector3 &other) const
     {
