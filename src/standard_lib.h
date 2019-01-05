@@ -8,7 +8,7 @@ namespace bigrock
     {
         OctreePointNearest() {data = T();}
         OctreePointNearest(const OctreePointNearest &other) {this->data = other.data;}
-        OctreePointNearest(const T data) {this->data = data;}
+        OctreePointNearest(const T &data) {this->data = data;}
 
         T data;
 
@@ -24,6 +24,8 @@ namespace bigrock
         {
             return other.data == this->data;
         }
+
+        operator T() {return data;}
     };
 
     template <class T>
@@ -31,7 +33,7 @@ namespace bigrock
     {
         OctreePointLerp() {data = T();}
         OctreePointLerp(const OctreePointLerp<T> &other) {this->data = other.data;}
-        OctreePointLerp(const T data) {this->data = data;}
+        OctreePointLerp(const T &data) {this->data = data;}
 
         T data;
 
@@ -51,6 +53,8 @@ namespace bigrock
         {
             return this->data == other.data;
         }
+
+        operator T() {return data;}
     };
 }
 

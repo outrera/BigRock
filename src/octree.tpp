@@ -45,6 +45,8 @@ namespace bigrock
             return; // Already subdivided
         
         const PointType data = *this->data; // Copy data so it doesn't get destroyed
+        
+        delete this->data;
 
         has_children = true;
         for(int i = 0; i < 8; i++)
