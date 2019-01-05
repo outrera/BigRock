@@ -196,4 +196,46 @@ namespace bigrock
         
         return cube_index;
     }
+
+    template <class PointType>
+    Octree<PointType>::Octree(Vector3 size, PointType data)
+    {
+        this->parent = NULL;
+        this->root = this;
+        this->depth = 0;
+
+        this->has_children = false;
+        this->data = new PointType(data);
+
+        this->relative_position = Vector3(0,0,0);
+        this->size = size;
+    }
+
+    template <class PointType>
+    Octree<PointType>::Octree(Vector3 size)
+    {
+        this->parent = NULL;
+        this->root = this;
+        this->depth = 0;
+
+        this->has_children = false;
+        this->data = new PointType();
+
+        this->size = size;
+        this->relative_position = Vector3(0,0,0);
+    }
+
+    template <class PointType>
+    Octree<PointType>::Octree()
+    {
+        this->parent = NULL;
+        this->root = this;
+        this->depth = 0;
+        
+        this->has_children = false;
+        this->data = new PointType();
+        
+        this->size = Vector3(1,1,1);
+        this->relative_position = Vector3(0,0,0);
+    }
 }

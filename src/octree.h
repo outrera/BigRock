@@ -2,8 +2,10 @@
 #define BIGROCK_OCTREE
 
 #include <stdint.h>
+#include <vector>
 
 #include "vector3.h"
+#include "shape.h"
 
 namespace bigrock
 {
@@ -126,50 +128,25 @@ namespace bigrock
         }
 
         int get_octant_index(Vector3 target);
+
+        bool intersects_point(const Vector3 &point); // Checks if the point falls within this Octant
+        bool intersects_shape(const Shape &shape); // Checks if this Octant shares space with the Shape
+
+        // Query this Octant and return all leaf nodes contained within the shape
+        std::vector<Octant*> query_shape(const Shape &shape, unsigned short max_depth=MAX_DEPTH);
+
+        // Place data using the given shape. ex. place a sphere of red material, or cut a
+        // rectangle out of terrain.
+        void apply_shape_data(const Shape &shape, const PointType &data, unsigned short max_depth=MAX_DEPTH);
     };
 
     template <class PointType>
     class Octree : public Octant<PointType>
     {
         public:
-        Octree(Vector3 size, PointType data)
-        {
-            this->parent = NULL;
-            this->root = this;
-            this->depth = 0;
-
-            this->has_children = false;
-            this->data = new PointType(data);
-
-            this->relative_position = Vector3(0,0,0);
-            this->size = size;
-        }
-
-        Octree(Vector3 size)
-        {
-            this->parent = NULL;
-            this->root = this;
-            this->depth = 0;
-
-            this->has_children = false;
-            this->data = new PointType();
-
-            this->size = size;
-            this->relative_position = Vector3(0,0,0);
-        }
-
-        Octree()
-        {
-            this->parent = NULL;
-            this->root = this;
-            this->depth = 0;
-            
-            this->has_children = false;
-            this->data = new PointType();
-            
-            this->size = Vector3(1,1,1);
-            this->relative_position = Vector3(0,0,0);
-        }
+        Octree(Vector3 size, PointType data);
+        Octree(Vector3 size);
+        Octree();
 
         Vector3 size; // Used for getting position and size of Octants
     };

@@ -11,10 +11,30 @@ namespace bigrock
 {
     struct Vector3
     {
-        BIGROCK_VEC3_TYPE x, y, z;
+        union
+        {
+            struct
+            {
+                BIGROCK_VEC3_TYPE x, y, z;
+            };
+            BIGROCK_VEC3_TYPE coords[3];
+        };
 
         Vector3(BIGROCK_VEC3_TYPE x, BIGROCK_VEC3_TYPE y, BIGROCK_VEC3_TYPE z);
         Vector3();
+
+        // Methods
+
+        Vector3 normalized() const;
+
+        BIGROCK_VEC3_TYPE distance_squared_to(const Vector3 &point) const; // Gets the distance to another point without performing a costly square root operation
+        BIGROCK_VEC3_TYPE distance_to(const Vector3 &point) const; // Gets the distance to another point. Try to avoid this and use distance_squared_to when you can.
+
+        BIGROCK_VEC3_TYPE length_squared() const;
+        BIGROCK_VEC3_TYPE length() const;
+        
+        Vector3 pow(int exp) const; // Returns this vector to the power of exp
+        BIGROCK_VEC3_TYPE dot(const Vector3 &other) const;
 
         // Vector3 Operators
         Vector3 operator+(const Vector3 &other) const;

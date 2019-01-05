@@ -1,5 +1,19 @@
 #include "vector3.h"
 
+#include <math.h>
+#include <iostream>
+
+#if BIGROCK_VEC3_TYPE == float
+#define _sqrt sqrtf
+#define _pow powf
+#elif BIGROCK_VEC3_TYPE == long double
+#define _sqrt sqrtl
+#define _pow powl
+#else
+#define _sqrt sqrt
+#define _pow pow
+#endif
+
 namespace bigrock
 {
     Vector3::Vector3(BIGROCK_VEC3_TYPE x, BIGROCK_VEC3_TYPE y, BIGROCK_VEC3_TYPE z)
@@ -15,6 +29,44 @@ namespace bigrock
         this->y = 0;
         this->z = 0;
     }
+
+    #pragma region Methods
+
+    Vector3 Vector3::normalized() const
+    {
+        return (*this) / this->length();
+    }
+
+    BIGROCK_VEC3_TYPE Vector3::distance_squared_to(const Vector3 &point) const
+    {
+        BIGROCK_VEC3_TYPE x, y, z;
+        x = (point.x - this->x);
+        y = (point.y - this->y);
+        z = (point.z - this->z);
+        return (x * x) + (y * y) + (z * z);
+    }
+
+    BIGROCK_VEC3_TYPE Vector3::distance_to(const Vector3 &point) const
+    {
+        return _sqrt(this->distance_squared_to(point));
+    }
+
+    BIGROCK_VEC3_TYPE Vector3::length_squared() const
+    {
+        return (this->x * this->x) + (this->y * this->y) + (this->z + this->z);
+    }
+
+    BIGROCK_VEC3_TYPE Vector3::length() const
+    {
+        return _sqrt(this->length_squared());
+    }
+
+    Vector3 Vector3::pow(int exp) const
+    {
+        return Vector3(_pow(this->x, exp), _pow(this->y, exp), _pow(this->z, exp));
+    }
+
+    #pragma endregion
 
     #pragma region Vector3 Operators
     Vector3 Vector3::operator+(const Vector3 &other) const
