@@ -17,8 +17,11 @@ namespace bigrock
     Octant<PointType>::~Octant()
     {
         if(has_children)
+        {
             for(int i = 0; i < 8; i++)
                 delete children[i];
+            delete [] children;
+        }
         else
             delete data;
     }
@@ -33,6 +36,8 @@ namespace bigrock
         
         for(int i = 0; i < 8; i++)
             delete children[i];
+        
+        delete [] children;
         
         this->has_children = false;
         this->data = new PointType(data);
@@ -49,6 +54,7 @@ namespace bigrock
         delete this->data;
 
         has_children = true;
+        children = new Octant<PointType>*[8];
         for(int i = 0; i < 8; i++)
         {
             children[i] = new Octant<PointType>(this, this->root, i, data);

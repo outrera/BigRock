@@ -48,7 +48,7 @@ namespace bigrock
         bool has_children;
         union
         {
-            Octant<PointType> *children[8];
+            Octant<PointType> **children; // Always has 8 children
             PointType *data;
         };
 
