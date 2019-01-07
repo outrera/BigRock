@@ -2,6 +2,7 @@
 
 namespace bigrock
 {
+    #pragma region Octant
     template <class PointType>
     Octant<PointType>::Octant(Octant<PointType> *parent, Octree<PointType> *root, uint8_t index, PointType data)
     {
@@ -139,7 +140,12 @@ namespace bigrock
     void Octant<PointType>::set_data(PointType data)
     {
         if(has_children)
-            throw std::logic_error("Attempted to set data of a non-leaf Octant");
+        {
+            Octant<PointType> *current_octant = this->children[0];
+            while(current_octant->has_children)
+                current_octant = current_octant->children[0];
+            current_octant->data = data;
+        }
         else
             this->data = new PointType(data);
     }
@@ -150,7 +156,7 @@ namespace bigrock
         Octant<PointType> *current_octant = this;
         Vector3 offset = current_octant->get_position();
         while(target != offset && (current_octant->depth < max_depth))
-        {
+        { // TODO: Replace Vector3 == Vector3 operations with something more approximate
             if(!current_octant->has_children)
                 current_octant->subdivide();
             
@@ -167,7 +173,7 @@ namespace bigrock
     }
 
     template <class PointType>
-    Octant<PointType> *Octant<PointType>::get_child(int index)
+    Octant<PointType> *Octant<PointType>::get_child(int index) const
     {
         if(!has_children)
             throw std::logic_error("Attempted to get child of leaf octant");
@@ -178,7 +184,7 @@ namespace bigrock
     }
 
     template <class PointType>
-    int Octant<PointType>::get_octant_index(Vector3 target)
+    int Octant<PointType>::get_octant_index(Vector3 target) const
     {
         int cube_index = 0;
 
@@ -197,6 +203,104 @@ namespace bigrock
         return cube_index;
     }
 
+    template <class PointType>
+    bool Octant<PointType>::intersects_point(const Vector3 &point) const
+    {
+        Rectangle oct_shape(this->get_position(), this->get_size());
+
+        return oct_shape.point_intersects(point);
+    }
+
+    template <class PointType>
+    bool Octant<PointType>::intersects_shape(const Shape &shape) const
+    {
+        Rectangle oct_shape(this->get_position(), this->get_size());
+
+        return oct_shape.interacts_with_shape(shape);
+    }
+
+    template <class PointType>
+    unsigned char Octant<PointType>::get_intersecting_children(const Shape &shape) const
+    {
+        if(!this->has_children)
+            return 0;
+        
+        char val = 0;
+        
+        for(int i = 0; i < 8; i++)
+        {
+            if(children[i]->intersects_shape(shape))
+                val |= (1 << i);
+        }
+        
+        return val;
+    }
+
+    template <class PointType>
+    unsigned int Octant<PointType>::query_shape(const Shape &shape, std::vector<Octant<PointType>*> &octants, const unsigned short max_depth)
+    {
+        if (!this->has_children)
+            return 0;
+
+        std::vector<Octant<PointType>*> octants;
+        Rectangle oct_shape(this->get_position(), this->get_size());
+
+        if (!root->intersects_shape(oct_shape)) // Shape does not intersect with Octant
+            return 0;
+        
+        int oct_count = 0;
+        for(int i = 0; i < 8; i++)
+        {
+            if(children[i]->has_children)
+                oct_count += children[i]->query_shape(shape, octants, max_depth);
+            else if(children[i]->intersects_shape(shape))
+            {
+                octants.push_back(children[i]);
+                oct_count += 1;
+            }
+        }
+        return oct_count;
+    }
+
+    template <class PointType>
+    void Octant<PointType>::apply_shape_data(const Shape &shape, const PointType &data, unsigned short subdiv_depth)
+    {
+        if(!this->has_children || this->depth >= max_depth)
+        {
+            if(this->intersects_shape(shape))
+                this->set_data(data);
+            return;
+        }
+
+        if(!this->intersects_shape(shape))
+            return;
+
+        if(depth + 1 < max_depth)
+        {
+            for(int i = 0; i < 8; i++)
+            {
+                if(children[i]->intersects_shape(shape))
+                {
+                    if(depth + 2 < max_depth)
+                        children[i]->subdivide();
+
+                    children[i]->apply_shape_data(shape, data, max_depth);
+                }
+            }
+        }
+        else
+        {
+            for(int i = 0; i < 8; i++)
+            {
+                if(children[i]->intersects_shape(shape))
+                    children[i]->set_data(data);
+            }
+        }
+    }
+
+    #pragma endregion // Octant
+
+    #pragma region Octree
     template <class PointType>
     Octree<PointType>::Octree(Vector3 size, PointType data)
     {
@@ -238,4 +342,6 @@ namespace bigrock
         this->size = Vector3(1,1,1);
         this->relative_position = Vector3(0,0,0);
     }
+
+    #pragma endregion // Octree
 }

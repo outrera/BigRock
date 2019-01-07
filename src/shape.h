@@ -24,8 +24,9 @@ namespace bigrock
 
     struct Sphere : public Shape
     {
-        Sphere() {radius = 0.5;}
-        Sphere(BIGROCK_VEC3_TYPE radius) {this->radius = radius;}
+        Sphere() {position = Vector3(0,0,0); radius = 0.5;}
+        Sphere(BIGROCK_VEC3_TYPE radius) {this->position = Vector3(0,0,0); this->radius = radius;}
+        Sphere(Vector3 position, BIGROCK_VEC3_TYPE radius) {this->position = position; this->radius = radius;}
 
         BIGROCK_VEC3_TYPE radius;
 
@@ -37,8 +38,9 @@ namespace bigrock
 
     struct Rectangle : public Shape
     {
-        Rectangle() {size = Vector3(1,1,1);}
-        Rectangle(Vector3 size) {this->size = size;}
+        Rectangle() {position = Vector3(0,0,0), size = Vector3(1,1,1);}
+        Rectangle(Vector3 size) {this->position = Vector3(0,0,0); this->size = size;}
+        Rectangle(Vector3 position, Vector3 size) {this->position = position; this->size = size;}
 
         Vector3 size;
 

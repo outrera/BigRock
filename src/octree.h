@@ -100,44 +100,45 @@ namespace bigrock
         // that data was emplaced at.
         Vector3 set_data(Vector3 target, PointType data, unsigned short max_depth=MAX_DEPTH);
 
-        Octant<PointType> *get_child(int index);
+        Octant<PointType> *get_child(int index) const;
 
-        inline Octant<PointType> *get_parent() {return this->parent;}
-        inline Octree<PointType> *get_root() {return this->root;}
-        inline bool is_leaf_node() {return !this->has_children;}
-        inline bool is_root() {return root == this;}
+        inline Octant<PointType> *get_parent() const {return this->parent;}
+        inline Octree<PointType> *get_root() const {return this->root;}
+        inline bool is_leaf_node() const {return !this->has_children;}
+        inline bool is_root() const {return root == this;}
 
-        inline Vector3 get_position()
+        inline Vector3 get_position() const
         {
             return this->relative_position * this->root->size;
         }
 
-        inline Vector3 get_relative_position()
+        inline Vector3 get_relative_position() const
         {
             return this->relative_position;
         }
 
-        inline Vector3 get_size()
+        inline Vector3 get_size() const
         {
             return this->root->size / (1 << (this->depth + 1)); // Fast bit-shift replacing pow(2, depth)
         }
 
-        inline Vector3 get_relative_size()
+        inline Vector3 get_relative_size() const
         {
             return Vector3(1,1,1) / (1 << (this->depth + 1));
         }
 
-        int get_octant_index(Vector3 target);
+        int get_octant_index(Vector3 target) const;
 
-        bool intersects_point(const Vector3 &point); // Checks if the point falls within this Octant
-        bool intersects_shape(const Shape &shape); // Checks if this Octant shares space with the Shape
+        bool intersects_point(const Vector3 &point) const; // Checks if the point falls within this Octant
+        bool intersects_shape(const Shape &shape) const; // Checks if this Octant shares space with the Shape
+        unsigned char get_intersecting_children(const Shape &shape) const; // Returns an 8-bit number of children contained by the shape, with each bit representing an Octant index.
 
         // Query this Octant and return all leaf nodes contained within the shape
-        std::vector<Octant*> query_shape(const Shape &shape, unsigned short max_depth=MAX_DEPTH);
+        unsigned int query_shape(const Shape &shape, std::vector<Octant<PointType>*> &octants, const unsigned short max_depth=MAX_DEPTH);
 
         // Place data using the given shape. ex. place a sphere of red material, or cut a
         // rectangle out of terrain.
-        void apply_shape_data(const Shape &shape, const PointType &data, unsigned short max_depth=MAX_DEPTH);
+        void apply_shape_data(const Shape &shape, const PointType &data, unsigned short subdiv_depth);
     };
 
     template <class PointType>
