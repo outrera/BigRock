@@ -100,11 +100,11 @@ namespace bigrock
     }
 
     template <class PointType>
-    PointType Octant<PointType>::get_data()
+    PointType Octant<PointType>::get_data() const
     {
         if(this->has_children)
         {
-            Octant<PointType> *current_octant = this;
+            const Octant<PointType> *current_octant = this;
 
             while(current_octant->has_children)
                 current_octant = current_octant->children[0];
@@ -118,7 +118,7 @@ namespace bigrock
     }
 
     template <class PointType>
-    PointType Octant<PointType>::get_data(Vector3 target)
+    PointType Octant<PointType>::get_data(Vector3 target) const
     {
         if(!has_children) // Can't do anything, returns own data
             return this->data;
@@ -144,7 +144,7 @@ namespace bigrock
             Octant<PointType> *current_octant = this->children[0];
             while(current_octant->has_children)
                 current_octant = current_octant->children[0];
-            current_octant->data = data;
+            current_octant->data = new PointType(data);
         }
         else
             this->data = new PointType(data);
@@ -241,8 +241,7 @@ namespace bigrock
     {
         if (!this->has_children)
             return 0;
-
-        std::vector<Octant<PointType>*> octants;
+        
         Rectangle oct_shape(this->get_position(), this->get_size());
 
         if (!root->intersects_shape(oct_shape)) // Shape does not intersect with Octant
@@ -263,7 +262,7 @@ namespace bigrock
     }
 
     template <class PointType>
-    void Octant<PointType>::apply_shape_data(const Shape &shape, const PointType &data, unsigned short subdiv_depth)
+    void Octant<PointType>::apply_shape_data(const Shape &shape, const PointType &data, unsigned short max_depth)
     {
         if(!this->has_children || this->depth >= max_depth)
         {

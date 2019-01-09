@@ -55,9 +55,9 @@ namespace bigrock
         };
 
         Octant(Octant<PointType> *parent, Octree<PointType> *root, uint8_t index, PointType data); // Child constructor
-        ~Octant();
 
         public:
+        ~Octant();
 
         // Constants
         static const uint16_t MAX_DEPTH = 65535;
@@ -86,11 +86,11 @@ namespace bigrock
 
         // Returns this Octant's data if it's a leaf, or the lowest leaf at the same position
         // if it's a parent.
-        PointType get_data();
+        PointType get_data() const;
         // Tries to find the data at the given position in the Octree.
         // If the Octree isn't detailed enough to reach the target,
         // interpolates between existing data and returns the result.
-        PointType get_data(Vector3 target);
+        PointType get_data(Vector3 target) const;
 
         // Sets the data of this leaf Octant. Throws an exception
         // if this Octant is not a leaf.
@@ -119,12 +119,12 @@ namespace bigrock
 
         inline Vector3 get_size() const
         {
-            return this->root->size / (1 << (this->depth + 1)); // Fast bit-shift replacing pow(2, depth)
+            return this->root->size / (1 << (this->depth)); // Fast bit-shift replacing pow(2, depth)
         }
 
         inline Vector3 get_relative_size() const
         {
-            return Vector3(1,1,1) / (1 << (this->depth + 1));
+            return Vector3(1,1,1) / (1 << (this->depth));
         }
 
         int get_octant_index(Vector3 target) const;

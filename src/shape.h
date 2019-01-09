@@ -30,10 +30,25 @@ namespace bigrock
 
         BIGROCK_VEC3_TYPE radius;
 
-        bool point_intersects(const Vector3 &point) const;
-        Vector3 get_bounds() const;
-        Vector3 get_bottom_left() const;
-        Vector3 get_closest_point(const Vector3 &target) const;
+        inline bool point_intersects(const Vector3 &point) const
+        {
+            return position.distance_squared_to(point) <= (radius * radius);
+        }
+
+        inline Vector3 get_bounds() const
+        {
+            return Vector3(radius * 2, radius * 2, radius * 2);
+        }
+
+        inline Vector3 get_bottom_left() const
+        {
+            return position - Vector3(radius, radius, radius);
+        }
+        
+        inline Vector3 get_closest_point(const Vector3 &other) const
+        {
+            return position + ((other - position).normalized() * radius);
+        }
     };
 
     struct Rectangle : public Shape
@@ -45,8 +60,17 @@ namespace bigrock
         Vector3 size;
 
         bool point_intersects(const Vector3 &point) const;
-        Vector3 get_bounds() const;
-        Vector3 get_bottom_left() const;
+
+        inline Vector3 get_bounds() const
+        {
+            return size;
+        }
+
+        inline Vector3 get_bottom_left() const
+        {
+            return position - (size / 2);
+        }
+        
         Vector3 get_closest_point(const Vector3 &target) const;
     };
 }

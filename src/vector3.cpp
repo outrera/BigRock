@@ -3,15 +3,15 @@
 #include <math.h>
 #include <iostream>
 
-#if BIGROCK_VEC3_TYPE == float
-#define _sqrt sqrtf
-#define _pow powf
-#elif BIGROCK_VEC3_TYPE == long double
+#if BIGROCK_VEC3_TYPE_ENUM == BIGROCK_LONG_DOUBLE_ENUM
 #define _sqrt sqrtl
 #define _pow powl
-#else
+#elif BIGROCK_VEC3_TYPE_ENUM == BIGROCK_DOUBLE_ENUM
 #define _sqrt sqrt
 #define _pow pow
+#else
+#define _sqrt sqrtf
+#define _pow powf
 #endif
 
 namespace bigrock

@@ -12,9 +12,6 @@ opts.Add(EnumVariable('platform', 'The target compilation platform', '', allowed
 opts.Add(EnumVariable('build', 'What type of build to run', 'object', allowed_values=['object', 'static', 'dynamic', 'shared'], ignorecase=2))
 opts.Add(EnumVariable('target', 'The compilation target', 'debug', allowed_values=['debug', 'release'], ignorecase=2))
 opts.Add(PathVariable('target_path', 'The location to place the resulting library (if a library is built).', 'bin/bigrock', PathVariable.PathAccept))
-opts.Add(EnumVariable('exclude_standard_data', 'Exclude the standard OctreePoint templates from compilation.', 'no', allowed_values=['yes', 'no'], ignorecase=2))
-opts.Add(EnumVariable('allow_implicit_conversion', 'Allows the standard OctreePoint templates to implicitly convert to and from their passed type', 'yes', allowed_values=['yes', 'no'], ignorecase=2))
-opts.Add(EnumVariable('octree_check_bounds', 'Perform boundary checks during Octree operations.', 'no', allowed_values=['yes', 'no'], ignorecase=2))
 opts.Add(EnumVariable('vector3_type', 'The type to use for Vector3\'s xyz coordinates', 'float', allowed_values=['float', 'double', 'long_double'], ignorecase=2))
 opts.Add(PathVariable('build_test', 'The name of the test source file (stored in tests) to build', '', PathVariable.PathAccept))
 opts.Add(EnumVariable('use_mingw', 'Whether or not to use MinGW on Windows systems', 'no', allowed_values=['yes', 'no'], ignorecase=2))
@@ -28,17 +25,12 @@ if env['use_mingw'] == 'yes':
 Help(opts.GenerateHelpText(env))
 
 # Setup flags and targets
-if env['exclude_standard_data'] == 'yes':
-	env.Append(CPPDEFINES = ["BIGROCK_EXCLUDE_STANDARD_DATA"])
-if env['octree_check_bounds'] == 'yes':
-	env.Append(CPPDEFINES = ["BIGROCK_OCTREE_CHECK_BOUNDS"])
-if env['allow_implicit_conversion'] == 'no':
-	env.Append(CPPDEFINES = ["BIGROCK_STD_DISALLOW_CONVERSION"])
-
-if env['vector3_type'] != 'long_double':
-	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE ", env['vector3_type'])])
+if env['vector3_type'] == 'long_double':
+	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE_ENUM", "BIGROCK_LONG_DOUBLE_ENUM")])
+elif env['vector3_type'] == 'double':
+	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE_ENUM", "BIGROCK_DOUBLE_ENUM")])
 else:
-	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE", "long double")])
+	env.Append(CPPDEFINES = [("BIGROCK_VEC3_TYPE_ENUM", "BIGROCK_FLOAT_ENUM")])
 
 if env['platform'] == 'windows' and env['use_mingw'] == 'no':
 	env.Append(CCFLAGS = ["/EHsc"])
